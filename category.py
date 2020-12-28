@@ -30,7 +30,7 @@ def get_problems(cat_heading, url):
     for row in table.find_all("tr")[1:]:
         tds = row.find_all("td")
 
-        prob = "|<ul><li>- [ ] Done</li></ul>"
+        prob = "|&#9744; Done"
         id = tds[0].get_text()
         name = tds[1].get_text()
         link = tds[1].find("a").get('href')
@@ -74,7 +74,7 @@ for row in tables[0].find_all("tr")[1:]:
     dir_name = re.sub('[\,\\\/\&\?\(\)]', ' ', name).rstrip()
     dir_name = re.sub(' +', '_', dir_name)
     dir_name = "{}. {}".format(id.zfill(3), dir_name)
-    final_data += "|<ul><li>- [ ] Done</li></ul>|{}|[{}]({}/README.md)|{}|\n".format(
+    final_data += "|&#9744; Done|{}|[{}]({}/README.md)|{}|\n".format(
         id, name, urllib.parse.quote(dir_name), problems_count)
     # print(dir_name)
     # os.mkdir("categories/{}. {}".format(id.zfill(3), dir_name))

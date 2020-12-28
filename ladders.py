@@ -47,7 +47,7 @@ def get_ladder(dir_name, url):
         platform = tds[2].get_text()
         difficulty = tds[3].get_text()
         dataset = [id, name, link, platform, difficulty]
-        final_data += "|<ul><li>- [ ] Done</li></ul>|{}|[{}]({})|{}|{}|\n".format(id,
+        final_data += "|&#9744; Done|{}|[{}]({})|{}|{}|\n".format(id,
                                                                                   name, link, platform, difficulty)
         datasets.append(dataset)
 
@@ -85,7 +85,7 @@ for table_no in range(2):
         problems_count = tds[2].get_text()
         dir_name = re.sub('[\,\\\/\&\?\(\)]', ' ', name).rstrip()
         dir_name = "{}. {}".format(id.zfill(2), name)
-        final_data += "|<ul><li>- [ ] Done</li></ul>|{}|[{}]({}/README.md)|{}|\n".format(
+        final_data += "|&#9744; Done|{}|[{}]({}/README.md)|{}|\n".format(
             id, name, "ladders/" + urllib.parse.quote(dir_name), problems_count)
         print(dir_name, link)
         # get_ladder(dir_name, link)

@@ -3,6 +3,6 @@
 
 | Checkbox | ID | Problem Name|Online Judge|Difficulty Level|
 |:---:|:---:|:---:|:---:|:---:|
-|<ul><li>- [ ] Done</li></ul>|1|[Easy Calculation](http://www.spoj.com/problems/TRIGALGE/)|SPOJ|1|
-|<ul><li>- [ ] Done</li></ul>|2|[Square Root](http://www.spoj.com/problems/SQRROOT/)|SPOJ|2|
-|<ul><li>- [ ] Done</li></ul>|3|[Cube Root](http://www.spoj.com/problems/CUBERT/)|SPOJ|3|
+|&#9744; Done|1|[Easy Calculation](http://www.spoj.com/problems/TRIGALGE/)|SPOJ|1|
+|&#9744; Done|2|[Square Root](http://www.spoj.com/problems/SQRROOT/)|SPOJ|2|
+|&#9744; Done|3|[Cube Root](http://www.spoj.com/problems/CUBERT/)|SPOJ|3|
