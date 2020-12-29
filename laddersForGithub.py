@@ -17,6 +17,8 @@ problemStrHeader = '''# Ladder Name: {}
 |---|:---:|:---:|---|---|
 '''
 
+handle = 'T--'
+
 for ladder in ladders:
   s += '|&#9744; Done|{}|[{}]({})|{}|\n'.format(ladder['id'], ladder['name'], 'ladders/{}/README.md'.format(urllib.parse.quote(ladder['name'])), ladder['problemsCount'])
 
@@ -28,7 +30,12 @@ for ladder in ladders:
   problemStr = problemStrHeader.format(ladder['name'])
 
   for problem in ladder['problems']:
-    problemStr += '|&#9744; Done|{}|[{}]({})|{}|{}|\n'.format(problem['id'], problem['name'], problem['url'], problem['onlineJudge'], problem['difficulty'])
+    checkBox = '&#9744'
+
+    if (problem['onlineJudge'] == 'Codeforces'):
+      checkBox = '<img src="https://a2oj.thao.pw/?handle={}&url={}" width="13px"/>'.format(urllib.parse.quote(handle), urllib.parse.quote(problem['url']))
+
+    problemStr += '|{} Done|{}|[{}]({})|{}|{}|\n'.format(checkBox, problem['id'], problem['name'], problem['url'], problem['onlineJudge'], problem['difficulty'])
 
   open('./ladders/{}/README.md'.format(ladder['name']), 'w', encoding = 'utf-8').write(problemStr)
 
