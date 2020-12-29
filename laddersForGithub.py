@@ -3,21 +3,23 @@ import urllib.parse
 
 ladders = json.loads(open('ladders.json').read())
 
+handle = 'T--'
+
 s = ''
 
 s += '''# A2OJ-Ladder
 
+### Codeforces handle: {}
+
 | Checkbox | ID  | Name | Problems Count |
 |:---:|:---:|:---:|:---:|
-'''
+'''.format(handle)
 
 problemStrHeader = '''# Ladder Name: {}
 
 | Checkbox | ID  | Problem Name | Online Judge | Difficulty |
 |---|:---:|:---:|---|---|
 '''
-
-handle = 'T--'
 
 for ladder in ladders:
   s += '|&#9744; Done|{}|[{}]({})|{}|\n'.format(ladder['id'], ladder['name'], 'ladders/{}/README.md'.format(urllib.parse.quote(ladder['name'])), ladder['problemsCount'])
