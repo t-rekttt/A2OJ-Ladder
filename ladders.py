@@ -1,98 +1,129 @@
+import requests, json
 from bs4 import BeautifulSoup
-import requests
-import urllib
-import os
-import re
 
-write_to_file = False
+class A2OJ:
+  def login(self, username, password):
+    r = self.s.post('{}/signincode'.format(self.BASE_API), data = {
+      'url': '/ladders',
+      'Username': username,
+      'Password': password
+    }, allow_redirects = False)
 
+    assert(r.status_code == 302 and r.headers['Location'] == '/ladders')
 
-def get_ladder(dir_name, url):
-    url = "https://www.a2oj.com/{}".format(url)
+  def getLadders(self):
+    html = self.s.get('{}/ladders'.format(self.BASE_API)).text
 
-    data = requests.get(url).text
-    soup = BeautifulSoup(data, features="lxml")
-    tables = soup.findAll("table")
+    soup = BeautifulSoup(html, 'html.parser')
 
-    header = tables[0].find_all("tr")
-    ladder_name = header[0].find_all("td")[0].get_text().rstrip()
-    description = header[1].find_all("td")[0].get_text().rstrip().split(":")[1]
-    difficulty = header[2].find_all("td")[0].get_text().rstrip()
-    final_data = ""
+    tables = soup.find_all('table', class_ = 'tablesorter')
 
-    final_data += "# {}".format(ladder_name)
-    final_data += "\n"
-    final_data += "## {}\n".format("Description")
-    final_data += description
-    final_data += "\n"
-    final_data += "## {}".format(difficulty)
-    final_data += "\n"
-    final_data += "\n"
+    ladders = []
 
-    problems = tables[1]
-    prob_headings = [th.get_text()
-                     for th in problems.find("tr").find_all("th")]
-    heading_text = "| Checkbox | ID  | Problem Name | Online Judge | Difficulty |\n"
+    for table in tables:
+      body = table.find('tbody')
 
-    final_data += heading_text
-    final_data += "|---|:---:|:---:|---|---|\n"
+      rows = body.find_all('tr')
 
-    datasets = []
-    for row in problems.find_all("tr")[1:]:
-        tds = row.find_all("td")
-        # print(tds)
-        id = tds[0].get_text()
-        name = tds[1].get_text()
-        link = tds[1].find("a").get('href')
-        platform = tds[2].get_text()
-        difficulty = tds[3].get_text()
-        dataset = [id, name, link, platform, difficulty]
-        final_data += "|&#9744; Done|{}|[{}]({})|{}|{}|\n".format(id,
-                                                                                  name, link, platform, difficulty)
-        datasets.append(dataset)
+      for row in rows:
+        cols = row.find_all('td')
 
-    # print(datasets)
-    # print(final_data)
-    os.makedirs("ladders/" + dir_name)
-    file = open(os.path.join("ladders", dir_name, "README.md"), 'w')
-    file.write(final_data)
-    file.close()
+        colsText = map(lambda item: item.text, cols)
 
+        [_id, name, owner, problemsCount, usersCount, dependsOn] = colsText
 
-url = "https://www.a2oj.com/Ladders.html"
+        ladders.append({
+          'id': _id,
+          'name': name,
+          'problemsCount': problemsCount
+        })
 
-data = requests.get(url).text
-soup = BeautifulSoup(data, features="lxml")
-tables = soup.findAll("table")
+    ladders.sort(key=lambda item: int(item['id']))
 
-headings = [th.get_text() for th in tables[0].find("tr").find_all("th")]
-# print(headings)
+    return ladders
 
-final_data = "# A2OJ-Ladder\n\n"
-# print(header)
-heading_text = "| Checkbox | ID  | Name | Problems Count |\n"
+  def getProblems(self, ladderId):
+    html = self.s.get('{}/ladder'.format(self.BASE_API), params = { 'ID': ladderId }).text
 
-final_data += heading_text
-final_data += "|---|:---:|:---:|---|\n"
+    soup = BeautifulSoup(html)
 
-for table_no in range(2):
-    for row in tables[table_no].find_all("tr")[1:]:
-        tds = row.find_all("td")
-        # print(tds)
-        id = tds[0].get_text()
-        name = tds[1].get_text()
-        link = tds[1].find('a').get('href')
-        problems_count = tds[2].get_text()
-        dir_name = re.sub('[\,\\\/\&\?\(\)]', ' ', name).rstrip()
-        dir_name = "{}. {}".format(id.zfill(2), name)
-        final_data += "|&#9744; Done|{}|[{}]({}/README.md)|{}|\n".format(
-            id, name, "ladders/" + urllib.parse.quote(dir_name), problems_count)
-        print(dir_name, link)
-        # get_ladder(dir_name, link)
-# print(datasets)
-# print(final_data)
+    table = soup.find('table', class_ = 'tablesorter')
 
-if write_to_file:
-    file = open('README.md', 'w')
-    file.write(final_data)
-    file.close()
+    problems = []
+
+    body = table.find('tbody')
+
+    rows = body.find_all('tr')
+
+    for row in rows:
+      cols = row.find_all('td')
+
+      colsText = map(lambda item: item.text, cols)
+
+      assert(len(cols) == 5 or len(cols) == 6)
+
+      if len(cols) == 6:
+        [_id, name, onlineJudge, contest, difficulty, dependsOn] = colsText
+
+        problems.append({
+          'id': _id,
+          'name': name,
+          'onlineJudge': onlineJudge,
+          'contest': contest,
+          'difficulty': difficulty,
+          'url': cols[1].find('a')['href']
+        })
+      else:
+        [_id, name, onlineJudge, difficulty, dependsOn] = colsText
+
+        problems.append({
+          'id': _id,
+          'name': name,
+          'onlineJudge': onlineJudge,
+          'difficulty': difficulty,
+          'url': cols[1].find('a')['href']
+        })
+
+    problems.sort(key=lambda item: int(item['id']))
+
+    return problems
+
+  def formatLadderForWindows(self, ladders):
+    for i in range(len(ladders)):
+      ladders[i]['name'] = ladders[i]['name'] \
+        .replace('<= Codeforces Rating <=', 'to') \
+        .replace('<', 'before') \
+        .replace('>=', 'after') \
+        .replace('>', 'after')
+
+    return ladders
+
+  def getAll(self):
+    ladders = self.formatLadderForWindows(self.getLadders())
+
+    data = []
+
+    for ladder in ladders:
+      problems = self.getProblems(ladder['id'])
+
+      ladder['problems'] = problems
+
+      data.append(ladder)
+
+    return data
+
+  def __init__(self, username, password):
+    self.s = requests.session()
+    self.s.proxies = { 'http': 'http://localhost:8888', 'https': 'http://localhost:8888' }
+    self.s.verify = False
+    self.BASE_API = 'https://a2oj.com'
+
+    self.login(username, password)
+
+### To be filled
+username = ''
+password = ''
+###
+
+a2oj = A2OJ(username, password)
+open('ladders.json', 'w', encoding='utf-8').write(json.dumps(a2oj.getAll()))
