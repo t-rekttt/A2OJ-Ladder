@@ -3,7 +3,7 @@ import urllib.parse
 
 ladders = json.loads(open('ladders.json').read())
 
-handle = 'T--'
+handle = 'FanTDung20Nam'
 
 s = ''
 
